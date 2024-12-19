@@ -1,24 +1,39 @@
 import express from 'express'
 import 'dotenv/config'
 import userRouter from './routes/userRouter.js'
+import postRouter from './routes/postRouter.js'
 import mongoose from 'mongoose'
+import cors from 'cors'
 
 const app = express()
 
 const PORT = process.env.PORT || 3000
 
+app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended : false}))
-app.use(userRouter)
+app.use('/users', userRouter);
+app.use('/posts', postRouter);
+
+
 
 
 const MONGO_URI = process.env.MONGO_URI
 
-mongoose.connect(MONGO_URI)
 
-app.get('/', (request, response) => {
-    response.send(`Welcome to my API`)
-})
+const firstMiddleware =  (request, response, next) => {
+    console.log(`Welcome to my API`)
+    next()
+}
+
+const secondMiddleware = (request, response, next) => {
+    response.send('Hello world')
+}
+
+
+app.get('/', firstMiddleware, secondMiddleware)
+
+
 
 
 mongoose.connect(MONGO_URI)
@@ -27,6 +42,7 @@ db.on('connected', () => {
     console.log('Connected to the database 🟢')
 })
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
+
 
 
 
